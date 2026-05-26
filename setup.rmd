@@ -1,1 +1,93 @@
+#Initial Setup/Package installation 
+install.packages(c(
+  "Seurat",
+  "tidyverse",
+  "patchwork",
+  "pheatmap",
+  "glmnet",
+  "caret",
+  "viridis"
+))
 
+if (!require("BiocManager"))
+    install.packages("BiocManager")
+
+BiocManager::install(c(
+  "SingleCellExperiment",
+  "GSVA",
+  "clusterProfiler"
+))
+
+#Add data retrieval or files here 
+
+##Seurat Object 
+library(Seurat)
+'''
+counts <- Read10X(data.dir = "data/raw/")
+
+mel <- CreateSeuratObject(
+  counts = counts,
+  project = "Melanoma_ICB",
+  min.cells = 3,
+  min.features = 200
+)
+'''
+#Load in meta data
+meta <- read.csv("metadata/clinical_metadata.csv")
+
+mel <- AddMetaData(mel, metadata = meta)
+
+#Mitochondrial % filtering 
+mel[["percent.mt"]] <- PercentageFeatureSet(
+  mel,
+  pattern = "^MT-"
+)
+#Filter out low quality cells, need to double check rna perimeters 
+mel <- subset(
+  mel,
+  subset =
+    nFeature_RNA > 300 &
+    nFeature_RNA < 5000 &
+    percent.mt < 15
+)
+##Normalization 
+mel <- NormalizeData(mel)
+
+mel <- FindVariableFeatures(
+  mel,
+  selection.method = "vst",
+  nfeatures = 2000
+)
+#scale (check this) 
+mel <- ScaleData(mel) 
+
+#This needs to change to match ast project parameters etc 
+mel <- RunPCA(mel)
+ElbowPlot(mel)
+
+mel <- FindNeighbors(mel, dims = 1:20)
+
+mel <- FindClusters(
+  mel,
+  resolution = 0.5
+)
+#UMAP 
+mel <- RunUMAP(
+  mel,
+  dims = 1:20
+)
+
+DimPlot(
+  mel,
+  reduction = "umap",
+  label = TRUE
+)
+##Marker Identification 
+#check only.pos parameter 
+markers <- FindAllMarkers(
+  mel,
+  only.pos = TRUE
+)
+
+#Compare volume of cells in each cell type in responders vs non-responders 
+#Diff exp of known immunotherapy assoc genes
