@@ -1,4 +1,12 @@
+---
+title: "Mel Analysis Setup"
+author: "Anna McNiff"
+date: "2026-05-26"
+output: html_document
+---
+
 #Initial Setup/Package installation 
+```{r}
 install.packages(c(
   "Seurat",
   "tidyverse",
@@ -17,11 +25,18 @@ BiocManager::install(c(
   "GSVA",
   "clusterProfiler"
 ))
+```
 
+
+```{r}
 #Add data retrieval or files here 
+```
 
+
+```{r}
 ##Seurat Object 
 library(Seurat)
+
 '''
 counts <- Read10X(data.dir = "data/raw/")
 
@@ -32,6 +47,9 @@ mel <- CreateSeuratObject(
   min.features = 200
 )
 '''
+```
+
+```{r}
 #Load in meta data
 meta <- read.csv("metadata/clinical_metadata.csv")
 
@@ -42,6 +60,9 @@ mel[["percent.mt"]] <- PercentageFeatureSet(
   mel,
   pattern = "^MT-"
 )
+```
+
+```{r}
 #Filter out low quality cells, need to double check rna perimeters 
 mel <- subset(
   mel,
@@ -50,7 +71,10 @@ mel <- subset(
     nFeature_RNA < 5000 &
     percent.mt < 15
 )
+```
+
 ##Normalization 
+```{r}
 mel <- NormalizeData(mel)
 
 mel <- FindVariableFeatures(
@@ -58,36 +82,63 @@ mel <- FindVariableFeatures(
   selection.method = "vst",
   nfeatures = 2000
 )
+```
+
+```{r}
 #scale (check this) 
 mel <- ScaleData(mel) 
+```
 
+```{r}
 #This needs to change to match ast project parameters etc 
 mel <- RunPCA(mel)
 ElbowPlot(mel)
+```
 
+```{r}
 mel <- FindNeighbors(mel, dims = 1:20)
+``` 
 
+```{r}
 mel <- FindClusters(
   mel,
   resolution = 0.5
 )
-#UMAP 
+```
+
+##UMAP 
+```{r}
 mel <- RunUMAP(
   mel,
   dims = 1:20
 )
+```
 
+```{r} 
+#plot umap
 DimPlot(
   mel,
   reduction = "umap",
   label = TRUE
 )
+```
+
+```{r}
 ##Marker Identification 
 #check only.pos parameter 
 markers <- FindAllMarkers(
   mel,
   only.pos = TRUE
 )
+```
 
-#Compare volume of cells in each cell type in responders vs non-responders 
-#Diff exp of known immunotherapy assoc genes
+##Compare volume of cells in each cell type in responders vs non-responders 
+```{r}
+
+```
+
+##Diff exp of known immunotherapy assoc genes
+```{r}
+
+```
+
