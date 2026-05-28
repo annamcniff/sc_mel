@@ -1,0 +1,17 @@
+"0","##Seurat Object "
+"0","library(Seurat)"
+"0",""
+"0","'''"
+"0","counts <- Read10X(data.dir = ""data/raw/"")"
+"0",""
+"0","mel <- CreateSeuratObject("
+"0","  counts = counts,"
+"0","  project = ""Melanoma_ICB"","
+"0","  min.cells = 3,"
+"0","  min.features = 200"
+"0",")"
+"0","'''"
+"2","Error: unexpected string constant in:
+"")
+'""
+"
